@@ -14,13 +14,35 @@ Query books' information via their ISBN.
 
 This API has two endpoints:
 
-- `/` (GET)
-    TODO: add example of query and its output
-- `/book/<ISBN>` (GET)
-    TODO: add example of query and its output
+- `/` (GET):
+  ```bash
+  $ curl localhost:8000/
+  {"message":"Hello, you are currently working with server 1"}
+  ```
+- `/books/<ISBN>` (GET):
+  ```bash
+  $ curl localhost:8000/books/9780140328721 | jq
+  {
+  "title": "Fantastic Mr. Fox",
+  "isbn10": [
+    "0140328726"
+  ],
+  "isbn13": [
+    "9780140328721"
+  ],
+  "authors": [
+    "Roald Dahl"
+  ],
+  "cover_url": "https://covers.openlibrary.org/b/id/8739161-M.jpg"
+  }
+  ```
 
-As well as an interactive documentation at `/doc` and an alternative one at
-`/redoc` (this is not interactive).
+This system also has interactive documentation at
+[`/doc`](http://localhost:8000/doc) and an alternative one at
+[`/redoc`](http://localhost:8000/doc) (this is not interactive).
+
+You can check the OpenAPI specification for this system at
+[/openapi.json](http://localhost:8000/openapi.json)
 
 ## Running the server
 
@@ -42,11 +64,43 @@ Install the dependencies and run the server:
   $ uvicorn isbn_api.main:app --host 0.0.0.0
   ```
 
-The server will be listening on port 8000.
+The server will be listening on port `8000`.
 
 ### Via Docker
 
 ### Via docker-compose
+
+This way you have an Nginx caching the queries, as well as load balancing the
+requests between two instances. The port to query the functionality is `80`,
+instead of `8000`.
+
+## Tests
+
+To run the tests for the API:
+
+```bash
+$ hatch run cov
+======================= test session starts =======================
+platform linux -- Python 3.10.8, pytest-7.2.0, pluggy-1.0.0
+rootdir: /home/projects/isbn-api
+plugins: anyio-3.6.2, cov-4.0.0
+collected 8 items
+
+tests/test_main.py ........                                 [100%]
+
+---------- coverage: platform linux, python 3.10.8-final-0 -----------
+Name                   Stmts   Miss Branch BrPart  Cover   Missing
+------------------------------------------------------------------
+isbn_api/__init__.py       0      0      0      0   100%
+isbn_api/main.py          29      0      4      0   100%
+tests/__init__.py          0      0      0      0   100%
+tests/test_main.py        35      0      0      0   100%
+------------------------------------------------------------------
+TOTAL                     64      0      4      0   100%
+
+
+======================== 8 passed in 2.30s ========================
+```
 
 ## License
 

@@ -22,6 +22,7 @@ classifiers = [
 dependencies = [
   "fastapi",
   "uvicorn",
+  "requests",
 ]
 dynamic = ["version"]
 
@@ -37,6 +38,7 @@ path = "isbn_api/__about__.py"
 dependencies = [
   "pytest",
   "pytest-cov",
+  "httpx",
 ]
 [tool.hatch.envs.default.scripts]
 cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=isbn_api --cov=tests {args}"
