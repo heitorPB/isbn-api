@@ -1,0 +1,8 @@
+# Ignore everything
+*
+
+# Add specific content only
+!.dockerignore
+!Dockerfile
+!isbn_api/*py
+!pyproject.toml

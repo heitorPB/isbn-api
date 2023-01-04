@@ -68,6 +68,18 @@ The server will be listening on port `8000`.
 
 ### Via Docker
 
+Use the supplied `Dockerfile` to build and run the image:
+
+```bash
+$ docker build -t isbn_api .
+$ docker run --rm --name isbn_api --port 8000:8000 localhost/isbn_api
+```
+
+The server will be accessible at port `8000`.
+
+Note: tested using rootless containers, you might need to `sudo` the commands
+if using Docker.
+
 ### Via docker-compose
 
 This way you have an Nginx caching the queries, as well as load balancing the
