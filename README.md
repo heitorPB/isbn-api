@@ -82,9 +82,18 @@ if using Docker.
 
 ### Via docker-compose
 
+The `docker-compose.yaml` file provides a simple way to spin up the ISBN REST
+API and an Nginx instance.
+
 This way you have an Nginx caching the queries, as well as load balancing the
-requests between two instances. The port to query the functionality is `80`,
-instead of `8000`.
+requests between one or more API instances. The port to query the functionality
+is `8080`, instead of `8000`.
+
+To use it:
+
+```bash
+$ docker-compose up --detach
+```
 
 ## Tests
 

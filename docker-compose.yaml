@@ -1,0 +1,24 @@
+version: "3.9"
+
+services:
+    api:
+        image: isbn_api
+        build:
+            context: .
+            dockerfile: Dockerfile
+        networks:
+            - "backend_network"
+
+    nginx:
+        image: nginx:1.23
+        ports:
+            - "8080:80"
+        volumes:
+            - ./nginx.conf:/etc/nginx/nginx.conf:ro
+        networks:
+            - "backend_network"
+        depends_on:
+            - api
+
+networks:
+    backend_network:
