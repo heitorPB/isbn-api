@@ -39,10 +39,12 @@ dependencies = [
   "pytest",
   "pytest-cov",
   "httpx",
+  "flake8",
 ]
 [tool.hatch.envs.default.scripts]
 cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=isbn_api --cov=tests {args}"
 no-cov = "cov --no-cov {args}"
+lint = "flake8 isbn_api/ tests/"
 serve = "uvicorn isbn_api.main:app --reload --host 0.0"
 
 [[tool.hatch.envs.test.matrix]]

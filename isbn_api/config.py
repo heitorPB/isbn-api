@@ -4,5 +4,6 @@
 
 from pydantic import BaseSettings
 
+
 class Settings(BaseSettings):
     server_name: str = "main"

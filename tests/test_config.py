@@ -3,7 +3,8 @@
 # SPDX-License-Identifier: MIT
 
 from isbn_api.config import Settings
-from isbn_api.main import app, get_settings
+from isbn_api.main import get_settings
+
 
 # Test server configuration
 

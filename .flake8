@@ -1,0 +1,6 @@
+[flake8]
+exclude = .git, __pycache__
+max-complexity = 10
+ignore =
+        # E261: require 2 spaces before inline comment
+        E261,
