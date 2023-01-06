@@ -3,16 +3,23 @@
 # SPDX-License-Identifier: MIT
 
 from fastapi.testclient import TestClient
-from isbn_api.main import app
+
+from isbn_api.config import Settings
+from isbn_api.main import app, get_settings
 
 client = TestClient(app)
 
 # Test / endpoint
 
+def get_settings_override():
+    return Settings(server_name="test")
+
+app.dependency_overrides[get_settings] = get_settings_override
+
 def test_root():
     response = client.get("/")
     assert response.status_code == 200
-    assert response.json() == {"message": f"Hello, you are currently working with server 1"}
+    assert response.json() == {"message": f"Hello from server test"}
 
 
 # Tests for /books/<ISBN> endpoint

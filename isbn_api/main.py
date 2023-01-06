@@ -1,13 +1,15 @@
 # SPDX-FileCopyrightText: 2023-present Heitor Pascoal de Bittencourt <heitorpbittencourt@gmail.com>
 #
 # SPDX-License-Identifier: MIT
+from functools import lru_cache
 
-from fastapi import FastAPI, Path
+from fastapi import Depends, FastAPI, Path
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 import requests
 
 from .__about__ import VERSION
+from .config import Settings
 
 DESCRIPTION = """Query book information."""
 
@@ -18,8 +20,9 @@ app = FastAPI(title="ISBN API",
                             "url": "https://opensource.org/licenses/MIT"},
              )
 
-# TODO: get this config from the environment
-SERVER_NAME = "1"
+@lru_cache()
+def get_settings():
+    return Settings()
 
 class Book(BaseModel):
     title: str
@@ -31,9 +34,11 @@ class Book(BaseModel):
 class Message(BaseModel):
     message: str
 
+
 @app.get("/")
-async def root():
-    return {"message": f"Hello, you are currently working with server {SERVER_NAME}"}
+async def root(settings: Settings = Depends(get_settings)):
+    return {"message": f"Hello from server {settings.server_name}"}
+
 
 @app.get("/books/{isbn}",
          response_model=Book,
