@@ -8,6 +8,15 @@ services:
             dockerfile: Dockerfile
         networks:
             - "backend_network"
+    api_fallback:
+        image: isbn_api
+        build:
+            context: .
+            dockerfile: Dockerfile
+        environment:
+            - SERVER_NAME=fallback
+        networks:
+            - "backend_network"
 
     nginx:
         image: nginx:1.23
@@ -19,6 +28,7 @@ services:
             - "backend_network"
         depends_on:
             - api
+            - api_fallback
 
 networks:
     backend_network:

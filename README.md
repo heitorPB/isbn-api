@@ -86,13 +86,81 @@ The `docker-compose.yaml` file provides a simple way to spin up the ISBN REST
 API and an Nginx instance.
 
 This way you have an Nginx caching the queries, as well as load balancing the
-requests between one or more API instances. The port to query the functionality
-is `8080`, instead of `8000`.
+requests between two API instances: `main` and `fallback`. The port to query
+the functionality is `8080`, instead of `8000`.
 
 To use it:
 
 ```bash
 $ docker-compose up --detach
+```
+
+#### Caching
+
+Nginx is configured to cache only the `/books/` endpoint. You can check if a
+request was cached by the `X-Proxy-Cache` response header:
+
+```bash
+$ curl 192.168.1.13:8080/ -D -
+HTTP/1.1 200 OK
+Server: nginx/1.23.3
+Date: Fri, 06 Jan 2023 14:03:08 GMT
+Content-Type: application/json
+Content-Length: 36
+Connection: keep-alive
+
+{"message":"Hello from server main"}
+
+$ curl 192.168.1.13:8080/books/1503222683 -D -
+HTTP/1.1 200 OK
+Server: nginx/1.23.3
+Date: Fri, 06 Jan 2023 14:03:14 GMT
+Content-Type: application/json
+Content-Length: 188
+Connection: keep-alive
+X-Proxy-Cache: MISS
+
+{"title":"Alice's Adventures in Wonderland","isbn10":["1503222683"],"isbn13":["9781503222687"],"authors":["Lewis Carroll"],"cover_url":"https://covers.openlibrary.org/b/id/10476757-M.jpg"}
+
+$ curl 192.168.1.13:8080/books/1503222683 -D -
+HTTP/1.1 200 OK
+Server: nginx/1.23.3
+Date: Fri, 06 Jan 2023 14:03:16 GMT
+Content-Type: application/json
+Content-Length: 188
+Connection: keep-alive
+X-Proxy-Cache: HIT
+
+{"title":"Alice's Adventures in Wonderland","isbn10":["1503222683"],"isbn13":["9781503222687"],"authors":["Lewis Carroll"],"cover_url":"https://covers.openlibrary.org/b/id/10476757-M.jpg"}
+```
+
+#### Load balancing
+
+Load balancing is done in a round-robing fashion, with the `main` instance
+handling 60% of the requests:
+
+```bash
+$ for i in {1..20}; do curl 192.168.1.13:8080/ ; echo; done
+{"message":"Hello from server main"}
+{"message":"Hello from server fallback"}
+{"message":"Hello from server main"}
+{"message":"Hello from server fallback"}
+{"message":"Hello from server main"}
+{"message":"Hello from server main"}
+{"message":"Hello from server fallback"}
+{"message":"Hello from server main"}
+{"message":"Hello from server fallback"}
+{"message":"Hello from server main"}
+{"message":"Hello from server main"}
+{"message":"Hello from server fallback"}
+{"message":"Hello from server main"}
+{"message":"Hello from server fallback"}
+{"message":"Hello from server main"}
+{"message":"Hello from server main"}
+{"message":"Hello from server fallback"}
+{"message":"Hello from server main"}
+{"message":"Hello from server fallback"}
+{"message":"Hello from server main"}
 ```
 
 ## Tests
@@ -101,26 +169,27 @@ To run the tests for the API:
 
 ```bash
 $ hatch run cov
-======================= test session starts =======================
+======================= test session starts ======================
 platform linux -- Python 3.10.8, pytest-7.2.0, pluggy-1.0.0
 rootdir: /home/projects/isbn-api
 plugins: anyio-3.6.2, cov-4.0.0
-collected 8 items
+collected 9 items
 
+tests/test_config.py .                                      [ 11%]
 tests/test_main.py ........                                 [100%]
 
----------- coverage: platform linux, python 3.10.8-final-0 -----------
+-------- coverage: platform linux, python 3.10.8-final-0 ---------
 Name                   Stmts   Miss Branch BrPart  Cover   Missing
 ------------------------------------------------------------------
 isbn_api/__init__.py       0      0      0      0   100%
-isbn_api/main.py          29      0      4      0   100%
-tests/__init__.py          0      0      0      0   100%
-tests/test_main.py        35      0      0      0   100%
+isbn_api/config.py         3      0      0      0   100%
+isbn_api/main.py          33      0      4      0   100%
+tests/test_config.py       5      0      0      0   100%
+tests/test_main.py        39      0      0      0   100%
 ------------------------------------------------------------------
-TOTAL                     64      0      4      0   100%
+TOTAL                     80      0      4      0   100%
 
-
-======================== 8 passed in 2.30s ========================
+======================== 9 passed in 2.28s =======================
 ```
 
 ## License
